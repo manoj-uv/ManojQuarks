@@ -1,0 +1,61 @@
+--/* =============================================================
+--   ITEM
+--   ============================================================= */
+--CREATE TABLE IF NOT EXISTS item (
+--    item_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+--    name         VARCHAR(255)  NOT NULL,
+--    description  VARCHAR(512),
+--    sku          VARCHAR(64)   NOT NULL UNIQUE,
+--    created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--    updated_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+--                                  ON UPDATE CURRENT_TIMESTAMP
+--);
+--
+--/* =============================================================
+--   INVENTORY
+--   ============================================================= */
+--CREATE TABLE IF NOT EXISTS inventory (
+--    inventory_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+--    item_id           BIGINT NOT NULL,
+--    total_quantity    INT    NOT NULL,
+--    reserved_quantity INT    NOT NULL,
+--    last_updated      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+--                                   ON UPDATE CURRENT_TIMESTAMP,
+--
+--    CONSTRAINT fk_inventory_item
+--        FOREIGN KEY (item_id)
+--        REFERENCES item (item_id)
+--        ON DELETE CASCADE
+--        ON UPDATE CASCADE,
+--
+--    CONSTRAINT chk_inventory_qty
+--        CHECK (reserved_quantity <= total_quantity)
+--);
+--
+--CREATE INDEX idx_inventory_item_id ON inventory (item_id);
+--
+--/* =============================================================
+--   RESERVATION
+--   ============================================================= */
+--CREATE TABLE IF NOT EXISTS reservation (
+--    reservation_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+--    item_id           BIGINT NOT NULL,
+--    quantity          INT    NOT NULL,
+--    status            VARCHAR(10)  NOT NULL,
+--    created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--
+--    CONSTRAINT fk_reservation_item
+--        FOREIGN KEY (item_id)
+--        REFERENCES item (item_id)
+--        ON DELETE CASCADE
+--        ON UPDATE CASCADE,
+--
+--    CONSTRAINT chk_reservation_qty
+--        CHECK (quantity > 0),
+--
+--    CONSTRAINT chk_reservation_status
+--        CHECK (status IN ('RESERVED', 'CANCELLED'))
+--);
+--
+--CREATE INDEX idx_reservation_item_status
+--        ON reservation (item_id, status);

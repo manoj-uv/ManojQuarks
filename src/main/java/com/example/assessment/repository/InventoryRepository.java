@@ -20,4 +20,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     Optional<Inventory> findByItemForUpdate(@Param("itemId") Long itemId);
 
     Optional<Inventory> findByItem(Item item);
+
+    @Query("select i from Inventory i where i.item.id = :itemId")
+    Optional<Inventory> findByItemId(@Param("itemId") Long itemId);
 }

@@ -17,11 +17,4 @@ public interface InventoryMapper {
     @Mapping(source = "item.itemId", target = "itemId")
     InventoryDto toDto(Inventory inv);
 
-//    // helper – MapStruct calls this during mapping
-//    @Named("itemIdToItem")
-//    default Item mapItem(Long itemId) {
-//        // you can inject the repository with @Context or Spring @Autowired
-//        return itemRepository.findById(itemId)
-//                .orElseThrow(() -> new ChangeSetPersister.NotFoundException("Item"));
-//    }
 }

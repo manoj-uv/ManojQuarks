@@ -1,5 +1,6 @@
 package com.example.assessment.service;
 
+import com.example.assessment.dto.CancelReservationResponse;
 import com.example.assessment.dto.ReserveInventoryRequest;
 import com.example.assessment.dto.ReserveInventoryResponse;
 import com.example.assessment.entity.Item;
@@ -26,7 +27,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
 
         int availableAfter = inventoryService.reserveStock(item.getItemId(), req.quantity());
-        // 2. Store reservation row
+
         Reservation res = reservationRepository.save(
                 Reservation.builder()
                         .item(item)
@@ -34,11 +35,37 @@ public class ReservationService {
                         .status(Reservation.ReservationStatus.RESERVED)
                         .build());
 
-        // 3. Build response
         return new ReserveInventoryResponse(res.getReservationId(),
                 req.itemId(),
                 req.quantity(),
                 res.getStatus(),
                 availableAfter);
+    }
+
+    @Transactional
+    public CancelReservationResponse cancelReservation(Long reservationId) {
+
+        Reservation res = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("Reservation " + reservationId + " not found"));
+
+        if (res.getStatus() != Reservation.ReservationStatus.RESERVED) {
+            throw new IllegalStateException("Reservation " + reservationId + " is already " + res.getStatus());
+        }
+
+        int qty = res.getQuantity();
+        Long itemId = res.getItem().getItemId();
+
+        int availableAfter = inventoryService.releaseStock(itemId, qty);
+
+        res.setStatus(Reservation.ReservationStatus.CANCELLED);
+        reservationRepository.save(res);
+
+        return new CancelReservationResponse(
+                res.getReservationId(),
+                itemId,
+                qty,
+                res.getStatus(),
+                availableAfter
+        );
     }
 }
